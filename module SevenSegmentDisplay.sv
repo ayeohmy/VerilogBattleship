@@ -45,6 +45,40 @@ module SevenSegmentDigit
 
 endmodule: SevenSegmentDigit
 
+module SevenSegmentDigitTester
+
+    (input logic [6:0] segment,
+     output logic [3:0] bcd,
+     output logic blank);
+
+    initial begin
+      $monitor($time,, "bcd = %b, segment = %b, blank = %b",bcd,segment,blank);
+          bcd = 4'b0000;
+          blank = 0;
+      // blank 0, valid number
+      #10 bcd = 4'b0000;
+      #10 bcd = 4'b0111;
+      #10 bcd = 4'b0101;
+
+      // blank 1, valid number
+      // pulse blank
+      #10 blank = 1;
+      #10 blank = 0;
+
+      // blank 0, not valid number
+      #10 bcd = 4'b1111;
+      #10 bcd = 4'b1011;
+
+      // blank 1, not valid number
+      // pulse blank
+      #10 blank = 1;
+      #10 blank = 0;
+
+    end
+endmodule: SevenSegmentDigitTester
+
+
+
 
 /* Controls the LED Number Display. It takes in a HEX (which number display) to display to
  * and displays that number sent into there (BCD_). The turn_on tells whether the 'blank' should be turned on or not
@@ -126,7 +160,7 @@ module IsSomethingWrong
 
     always_comb begin
         if(scoreThis) begin
-            if((X>0) && (X<11) && (Y>0) && (Y<11)) 
+            if((X>0) && (X<11) && (Y>0) && (Y<11))  // OR ((X < 0) || (X > 10) || (Y < 0) || (Y > 10)) 
                 somethingWrong = 1;
             else if(bigLeft == 2'b11) 
                 somethingWrong = 1;
