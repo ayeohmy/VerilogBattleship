@@ -160,11 +160,7 @@ module IsSomethingWrong
 
     always_comb begin
         if(scoreThis) begin
-<<<<<<< HEAD
             if ((X < 1) || (X > 10) || (Y < 1) || (Y > 10)) 
-=======
-            if((X>0) && (X<11) && (Y>0) && (Y<11))  // OR ((X < 0) || (X > 10) || (Y < 0) || (Y > 10)) 
->>>>>>> fef5c00f163b81095b5645bcdede7116907b0655
                 somethingWrong = 1;
             else if(bigLeft == 2'b11) 
                 somethingWrong = 1;
