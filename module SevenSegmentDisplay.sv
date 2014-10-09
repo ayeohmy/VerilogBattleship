@@ -151,8 +151,8 @@ endmodule: BombLightControl
  * It only does this if scoreThis has been pressed
  */
 module IsSomethingWrong
-        (input logic [4:0] X, 
-         input logic [4:0] Y,
+        (input logic [3:0] X, 
+         input logic [3:0] Y,
          input logic big,
          input logic [1:0] bigLeft,
          input logic scoreThis,
