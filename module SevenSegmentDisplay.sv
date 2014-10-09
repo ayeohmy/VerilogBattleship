@@ -126,7 +126,7 @@ module IsSomethingWrong
 
     always_comb begin
         if(scoreThis) begin
-            if((X>0) && (X<11) && (Y>0) && (Y<11)) 
+            if ((X < 1) || (X > 10) || (Y < 1) || (Y > 10)) 
                 somethingWrong = 1;
             else if(bigLeft == 2'b11) 
                 somethingWrong = 1;
@@ -154,7 +154,9 @@ module checkSquare
     logic calculateNearMiss;
      
     always_comb begin
-        if(((X == 7 | X == 8) && Y == 6) | ((X == 9 | X == 10) && Y == 1)) // then this is the patrol boat
+        if(X == 0 | X == 11 | Y == 0 | Y == 11)
+            biggestShip = 5'b000_00;
+        else if(((X == 7 | X == 8) && Y == 6) | ((X == 9 | X == 10) && Y == 1)) // then this is the patrol boat
             biggestShip = 5'b000_01;
         else if(X == 2 && (Y == 10 | Y == 9 | Y == 8))
             biggestShip = 5'b000_10;
@@ -247,16 +249,69 @@ module HandleHit
      output logic isHit,     
      output logic isNearMiss,
      output logic isMiss,
-     output logic [4:0] biggestShip);
+     output logic [4:0] biggestShip,
+     output logic [3:0] numHit);
+
+
+    logic isNearMiss1, isNearMiss2, isNearMiss3, isNearMiss4, isNearMiss5, isNearMiss6, isNearMiss7, isNearMiss8, isNearMiss9;
+    logic isHit1, isHit2, isHit3, isHit4, isHit5, isHit6, isHit7, isHit8, isHit9;
+    logic isMiss1, isMiss2, isMiss3, isMiss4, isMiss5, isMiss6, isMiss7, isMiss8, isMiss9;
+    logic [4:0] biggestShip1, biggestShip2, biggestShip3, biggestShip4, biggestShip5, biggestShip6, biggestShip7, biggestShip8, biggestShip9;
+
+    checkSquare CS1 (X, Y, isHit1, isNearMiss1, isMiss1, biggestShip1); // this is the center of the big bomb
+    checkSquare CS2 (X-1, Y, isHit2, isNearMiss2, isMiss2, biggestShip2);
+    checkSquare CS3 (X+1, Y, isHit3, isNearMiss3, isMiss3, biggestShip3);
+    checkSquare CS4 (X, Y-1, isHit4, isNearMiss4, isMiss4, biggestShip4);
+    checkSquare CS5 (X, Y+1, isHit5, isNearMiss5, isMiss5, biggestShip5);
+    checkSquare CS6 (X-1, Y-1, isHit6, isNearMiss6, isMiss6, biggestShip6);
+    checkSquare CS7 (X-1, Y+1, isHit7, isNearMiss7, isMiss7, biggestShip7);
+    checkSquare CS8 (X+1, Y-1, isHit8, isNearMiss8, isMiss8, biggestShip8);
+    checkSquare CS9 (X+1, Y+1, isHit9, isNearMiss9, isMiss9, biggestShip9);
+    
+
 
      always_comb begin
         if(~somethingWrong && scoreThis)  // handles what to do when everything is fine
             begin
                 if(big) begin
                     // handles what to do when a big bomb is used
+                    // then fill the outputs with the right things
+                    isHit = isHit1 | isHit2 | isHit3 | isHit4 | isHit5 | isHit6 | isHit7 | isHit8 | isHit9;
+                    isMiss = ~isHit;
+                    isNearMiss = isNearMiss1 | isNearMiss2 | isNearMiss3 | isNearMiss4 | isNearMiss5 | isNearMiss6 | isNearMiss7 | isNearMiss8 | isNearMiss9;
+                    
+                    biggestShip = (biggestShip1 | biggestShip2 | biggestShip3 | biggestShip4 | biggestShip5 | biggestShip6 | biggestShip7 | biggestShip8 | biggestShip9)
+                    if((biggestShip&5'b100_00) == 5'b100_00 )
+                        biggestShip = 5'b100_00;
+                    else if((biggestShip&5'b010_00) == 5'b010_00 )
+                        biggestShip = 5'b010_00;
+                    else if((biggestShip&5'b001_00) == 5'b001_00 )
+                        biggestShip = 5'b001_00;
+                    else if((biggestShip&5'b000_10) == 5'b000_10 )
+                        biggestShip = 5'b000_10;
+                    else if((biggestShip&5'b000_01) == 5'b000_01 )
+                        biggestShip = 5'b000_01;
+                    else
+                        biggestShip = 5'b000_00;
+
+                    if(isHit1) numHit = numHit + 1;
+                    if(isHit2) numHit = numHit + 1;
+                    if(isHit3) numHit = numHit + 1;
+                    if(isHit4) numHit = numHit + 1;
+                    if(isHit5) numHit = numHit + 1;
+                    if(isHit6) numHit = numHit + 1;
+                    if(isHit7) numHit = numHit + 1;
+                    if(isHit8) numHit = numHit + 1;
+                    if(isHit9) numHit = numHit + 1;
+
                 end 
                 else begin
                     // handles what to do when it is just a small bomb
+                    isHit = isHit1;
+                    isNearMiss = isNearMiss1;
+                    isMiss = isMiss1;
+                    biggestShip = biggestShip1;
+                    numHits = isHit; // will return 1 if hit, else 0
                 end
             end 
 
@@ -339,7 +394,7 @@ module ChipInterface
     logic isHit, isMiss, isNearMiss;
     logic [4:0] biggestShip;
 
-    logic [3:0] numberHit;
+    logic [3:0] numHit;
 
 
     IsSomethingWrong ISW(X, Y, SW[17], SW[15:14], KEY[0], somethingWrong);
@@ -351,13 +406,13 @@ module ChipInterface
 
     end
 
-    HandleHit HH (somethingWrong, X, Y, SW[17], KEY[0], isHit, isNearMiss, isMiss, biggestShip); // this handles both wrong or not wrong
+    HandleHit HH (somethingWrong, X, Y, SW[17], KEY[0], isHit, isNearMiss, isMiss, biggestShip, numHit); // this handles both wrong or not wrong
     HandleWrong HW (somethingWrong, HEX6, HEX7);  handles what to do when something is wrong (ie. light up HEX6 and HEX7)
 
     // set the lights for hits and misses and stuffs
     BombLightControl BLC (isHit, isNearMiss, isMiss, biggestShip, LEDR[17:12], LEDR[11:6], LEDR[5:0], LEDG[4:0]);     // Handles all but NearMiss
 
-    NumberHitControl NHC (numberHit, HEX0);
+    NumberHitControl NHC (numHit, HEX0);
 
 
 endmodule:ChipInterface
